@@ -1,7 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+class PasswordResetRequest(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    email = models.EmailField()
+    otp = models.IntegerField()
+    expiration_time = models.DateTimeField()
 
+    def __str__(self):
+        return self.email
 class UserProfile(models.Model):
     ACCOMMODATION_CHOICES = (
         ('N', 'No'),
@@ -68,8 +75,8 @@ class UserProfile(models.Model):
     no_of_days = models.CharField(max_length=1, choices=DAYS_CHOICES,blank=True)
     id_issued = models.BooleanField(default=False)
     qr_code = models.ImageField(upload_to='qr_code', blank=True, null=True)
-    teamId = models.ForeignKey("registration.TeamRegistration", on_delete=models.SET_NULL, null=True, related_name="member",blank=True)
-    isesports=models.BooleanField(default=False)
+    teamId = models.ForeignKey("registration.TeamRegistration", on_delete=models.SET_NULL, null=True, related_name="member")
+
     def __str__(self):
         return self.user.username
 
@@ -130,6 +137,7 @@ class EsportsUserProfile(models.Model):
         ('3', 'Chess')
     )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+   
     phone = models.CharField(max_length=11)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='M')
     college = models.CharField(max_length=128)

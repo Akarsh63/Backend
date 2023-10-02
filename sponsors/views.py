@@ -2,7 +2,9 @@ from django.views.generic import ListView
 from .models import SponsorType, Sponsor
 from accounts.models import EsportsUserProfile, UserProfile
 from django.shortcuts import get_object_or_404, render
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions,status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from .serializers import SponsorSerializer
 
 
@@ -22,7 +24,11 @@ class SponsorView(ListView):
             context['userprofile'] = userprofile
             context['page'] = "home"
         return context
-
+@api_view(['GET'])
+def get_all_sponsors(request):
+    sponsors = Sponsor.objects.all()
+    serializer = SponsorSerializer(sponsors, many=True, context={'request': request})
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 class SponsorViewSet(viewsets.ModelViewSet):
     queryset = Sponsor.objects.all()

@@ -12,16 +12,26 @@ class SponsorType(models.Model):
     def __str__(self):
         return self.name
 
-
 class Sponsor(models.Model):
     name = models.CharField(max_length=128)
-    # logo = VersatileImageField(upload_to='sponsor')
     logo = models.ImageField(upload_to='sponsor')
     sponsor_type = models.ForeignKey(SponsorType, on_delete=models.CASCADE)
-    link = models.URLField(help_text="Sponsor's website url", null=True, blank=True, default=None)
+    link = models.URLField(help_text="Sponsor's website URL", null=True, blank=True, default=None)
 
     def __str__(self):
         return self.name
 
     class Meta:
-        ordering = ['sponsor_type__order', 'name']
+        ordering = ['name']
+# class Sponsor(models.Model):
+#     name = models.CharField(max_length=128)
+#     # logo = VersatileImageField(upload_to='sponsor')
+#     logo = models.ImageField(upload_to='sponsor')
+#     sponsor_type = models.ForeignKey(SponsorType, on_delete=models.CASCADE)
+#     link = models.URLField(help_text="Sponsor's website url", null=True, blank=True, default=None)
+
+#     def __str__(self):
+#         return self.name
+
+#     class Meta:
+#         ordering = ['sponsor_type__order', 'name']

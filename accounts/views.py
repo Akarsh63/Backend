@@ -1,6 +1,7 @@
 from random import random
+import uuid
 from django.views.generic import CreateView
-from .models import UserProfile, EsportsUserProfile
+from .models import UserProfile, EsportsUserProfile,PasswordResetRequest
 from .forms import EsportsRegisterFormBGMI, EsportsRegisterFormChess, EsportsRegisterFormValorant, RegisterForm
 from django.contrib.auth.views import LoginView
 from django.shortcuts import reverse, redirect
@@ -16,10 +17,9 @@ from django.contrib import messages
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.decorators import api_view,permission_classes
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
+from django.http import JsonResponse
+from .helpers import generate_otp, send_otp_email, create_reset_request
 
 # api method to register the user 
 
@@ -69,129 +69,71 @@ class RegisterUserView(APIView):
 
 @api_view(['POST'])
 def LoginUserView(request):
-    email = request.data.get('email')
-    password = request.data.get('password')
-    
-    user = User.objects.filter(email=email).first()
-    
-    if user is None:
-        return Response({"message": 'User not found!'}, status=status.HTTP_404_NOT_FOUND)
-    
-    if not user.check_password(password):
-        return Response({"message": 'Invalid Password or Email'}, status=status.HTTP_400_BAD_REQUEST)
-
-    # Generate a JWT token
-    refresh = RefreshToken.for_user(user)
-    access_token = str(refresh.access_token)
-    refresh_token = str(refresh)  # Extract the refresh token value
-
-    return Response({"message": 'User Logged in Successfully!', "access_token": access_token, "refresh_token": refresh_token}, status=status.HTTP_200_OK)
-
+      email = request.data['email']
+      password = request.data['password']
+      user = User.objects.filter(email=email).first()
+      if user is None:
+            return Response({"message":'User not found!'},status=status.HTTP_404_NOT_FOUND)
+      if not user.check_password(password):
+            return Response({"message":'Invalid Password or Email'},status=status.HTTP_400_BAD_REQUEST)
+      return Response({"message":'User Loged in Successfully!'}, status=status.HTTP_200_OK)
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def userleaveTeam(request):
-    user = get_object_or_404(UserProfile, user=request.user)
-    teamId = user.teamId
-    team = get_object_or_404(TeamRegistration, teamId=teamId)
-    if user == team.captian:
-        return Response({"message":"Sorry you can not leave the team!"}, status=status.HTTP_403_FORBIDDEN)
-    else:
-        user.teamId = None
-        user.save()
-        team.teamcount=team.teamcount-1
-        team.save()
-        return Response({"message": "You have left the team successfully."}, status=status.HTTP_200_OK)
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def userjoinTeam(request):
-    user = request.user
-    teamId = request.data.get('teamId')
-
-    if user is not None:
-        user = get_object_or_404(UserProfile, user=user)
-        if user.teamId is not None:
-            message = "You are already in team {}".format(user.teamId)
-            message += "\nYou have to register again to join another team. \nContact Varchas administrators."
-            return Response({"message": message}, status=status.HTTP_403_FORBIDDEN)
-        
-        team = get_object_or_404(TeamRegistration, teamId=teamId)
-        if user.gender != team.captian.gender:
-            return Response({"message":"Sorry,Gender not matched!"},status=status.HTTP_406_NOT_ACCEPTABLE)
-        if(team.teamcount < team.teamsize):
-            user.teamId = team
-            user.save()
-            team.teamcount=team.teamcount+1
-            team.save()
-            return Response({"message": "Joined team Successfully!"}, status=status.HTTP_201_CREATED)
-        else:
-           return Response({"message":"Sorry,Team size exceeded!"},status=status.HTTP_406_NOT_ACCEPTABLE)
-    return Response({"message": "User not found!"}, status=status.HTTP_404_NOT_FOUND)
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def userDisplayteam(request):
+def send_otp(request):
     try:
-        user_profile = get_object_or_404(UserProfile, user=request.user)
+        email = request.POST.get('email')
+        user = User.objects.filter(email=email).first()  # Get the user with the provided email
         
-        team_data = None
-        users_data = None
-        if user_profile.teamId:
-            team_id = user_profile.teamId
-            team_data = get_object_or_404(TeamRegistration, teamId=team_id)
-            users_data = UserProfile.objects.filter(teamId=team_id)
-        if user_profile.teamId is None:
-            return Response({"message":"Join a team"},status=status.HTTP_404_NOT_FOUND)
-        
-        response_data = {
-            "team_data": {
-                "team_id": team_data.teamId,
-                "sport": team_data.sport,
-                "college": team_data.college,
-                "captain_username": team_data.captian.user.first_name + team_data.captian.user.last_name if team_data.captian else None,
-                "score": team_data.score,
-                "category": team_data.category,
-            } if team_data else None,
-            "users_data": [
-                {
-                    "user_id": user_data.user.id,
-                    "email": user_data.user.username,
-                    "phone": user_data.phone,
-                    "name":user_data.user.first_name +user_data.user.last_name
-                }
-                for user_data in users_data
-            ] if users_data else None,
-            "is_captian":team_data.captian==user_profile
-        }
-        
-        return Response(response_data, status=status.HTTP_200_OK)
-    
-    except Exception as e:
-        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def userDisplayProfile(request):
-    user = get_object_or_404(UserProfile, user=request.user)
-    if user is None:
-        return Response({"message":"User not found!"},status=status.HTTP_404_NOT_FOUND)
-    response_data = {
-                "team_id" : user.teamId.teamId if user.teamId else None,
-                "college": user.college,
-                "user_id": user.user.id,
-                "email": user.user.username,
-                "phone": user.phone,
-                "name":user.user.first_name +user.user.last_name
-         }
-    return Response(response_data, status=status.HTTP_200_OK)
+        if user:
+            otp = generate_otp()
+            create_reset_request(email, otp)
+            send_otp_email(email, otp)
+            return JsonResponse({'success': True, 'message': 'OTP sent to your email.'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Email not found in the database.'})
 
-class HomeView(APIView):
-   permission_classes = (IsAuthenticated, )
-   def get(self, request):
-       
-       serializer=UserSerializer(request.user)
-       return Response({'message': serializer.data}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+@api_view(['POST'])
+def verify_otp(request):
+    try:
+        email = request.data['email']
+        otp = request.data['otp']
+
+        if PasswordResetRequest.objects.filter(email=email, otp=otp).exists():
+            return JsonResponse({'success': True, 'message': 'OTP verified successfully.'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Invalid OTP.'})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+@api_view(['POST'])
+def resend_otp(request):
+    try:
+        email = request.data['email']
+
+        if User.objects.filter(email=email).exists():
+            otp = generate_otp()
+            create_reset_request(email, otp)
+            send_otp_email(email, otp)
+            return JsonResponse({'success': True, 'message': 'OTP resent to your email.'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Email not found in the database.'})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+@api_view(['POST'])
+def check_password_match(request):
+    try:
+        new_password = request.data['new_password']
+        confirm_password = request.data['confirm_password']
+
+        if new_password == confirm_password:
+            return JsonResponse({'success': True, 'message': 'Passwords match.'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Passwords do not match.'})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
 
 class RegisterView(CreateView):
     form_class = RegisterForm
@@ -359,7 +301,7 @@ def DisplayTeam(request):
     except:
         team = get_object_or_404(EsportsTeamRegistration, teamId=teamId)
 
-    if team.category is not None:
+    if team.subevents is not None:
         subevents = team.subevents.split(', ')
         return render(request, 'accounts/myTeam.html', {'profile_team': team, 'profile_user': user, 'page': "team", 'user': request.user, 'userprofile': user, 'subevents': subevents})
 
@@ -534,6 +476,7 @@ def getVolleyBallEvents(request):
 
     return redirect('accounts:myTeam')
 
+
 @login_required(login_url="login")
 def leaveTeam(request):
     user = get_object_or_404(UserProfile, user=request.user)
@@ -564,6 +507,7 @@ def joinTeam(request):
             return redirect('accounts:myTeam')
         return reverse('login')
     return render(request, 'accounts/joinTeam.html')
+
 
 class UserViewSet(viewsets.ModelViewSet):
     """

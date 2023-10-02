@@ -8,12 +8,12 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['username', 'email','last_name','first_name','password']
 
 
-
 class UserProfileSerializer(serializers.ModelSerializer):
     # user = UserSerializer()
     class Meta:
         model=UserProfile
         fields='__all__'
+
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
