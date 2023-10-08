@@ -1,0 +1,99 @@
+{% extends 'adminportal/base.html' %}
+{% load static %}
+{% block body %}
+<style>
+  form{
+    margin-bottom: 10px ;
+  }
+  select{
+    margin: auto;
+  }
+  input[type=text] {
+  border: 1px solid black;
+  border-color: black;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  background-color:#e6e6e6;
+  }
+  button {
+  background-color: blue;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  outline: none;
+}
+
+
+button:hover {
+  background-color:darkblue;
+}
+
+   
+  
+
+</style>
+<div>
+<form action="{% url 'adminportal:teamdetails'  %}" method="post">
+        {% csrf_token %}
+        <h2 style="color:black">Search for any Teams</h2>
+        <div style="display:flex;justify-content:center">
+        <input placeholder="Enter Team ID" type="text" name="teamId"/>
+        <button type="submit" >Submit</button/>
+          </div>
+    </form>
+        {% comment %} {% if team %}  
+        {%endif%} {% endcomment %}
+        {%if team%}
+        
+        <div style=" background-color:#e6e6e6;display:block; width : 450px;height:350px;margin-left:300px; padding:10px;border:5px solid #e6e6e6; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);font-family: Arial, sans-serif" >
+          <h2 style="color:black; margin-left:100px ">Team Details</h2>
+        <h3 style="color:blue; margin-left:5px">  TeamId : {{team.teamId}}</h3>
+        <h3 style="color:blue; margin-left:5px">  Captain : {{team.captian}}</h3>
+        <h3 style="color:blue;margin-left:5px">  College : {{team.college}}</h3>
+        <h3 style="color:blue;margin-left:5px">  Sport : {{sport}}<h3>
+        <h3 style="color:blue;margin-left:5px">  Teams : {{team.teams}}</h3>
+        <h3 style="color:blue;margin-left:5px">  Category : {{team.category}}</h3>
+ {%if not code  %}
+ {%if team.team_member1_bgmi_ingame_id%}
+ <h3 style="color:blue;margin-left:5px">  id1 : {{team.team_member1_bgmi_ingame_id}}</h3>
+ <h3 style="color:blue;margin-left:5px">  id2 : {{team.team_member2_bgmi_ingame_id}}</h3>
+ <h3 style="color:blue;margin-left:5px">  id3 : {{team.team_member3_bgmi_ingame_id}}</h3>
+ <h3 style="color:blue;margin-left:5px">  id4 : {{team.team_member4_bgmi_ingame_id}}</h3>
+ {%if team.team_member1_cr_ingame_id %}
+ <h3 style="color:blue;margin-left:5px">  id : {{team.team_member1_cr_ingame_id}}</h3>
+ {%if team.team_member5_val_ingame_id %}
+ <h3 style="color:blue;margin-left:5px">  id1 : {{team.team_member1_val_ingame_id}}</h3>
+ <h3 style="color:blue;margin-left:5px">  id2 : {{team.team_member2_val_ingame_id}}</h3>
+ <h3 style="color:blue;margin-left:5px">  id3 : {{team.team_member3_val_ingame_id}}</h3>
+ <h3 style="color:blue;margin-left:5px">  id4 : {{team.team_member4_val_ingame_id}}</h3>
+ <h3 style="color:blue;margin-left:5px">  id5 : {{team.team_member5_val_ingame_id}}</h3>
+       
+         {%endif%}
+          {%endif%}
+          {%endif%}
+        {%endif%}
+         </div>
+        {%endif%}
+        <div>{{msg}}</div>
+        {%if code %}
+        
+        <h2 style="color:black; margin:10px;margin-left:400px;">Players Details</h2>
+        {% for user in users %}
+            <div style=" background-color:#e6e6e6;border:5px solid #e6e6e6;margin-bottom:20px;border-radius:30px;box-shadow: 0 8px 8px 8px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); display:flex; justify-Content:space-around;">
+            <h3 style="color:blue; ">Name: {{user.user.first_name}}</h3>
+           <h3 style="color:blue; ">Email: {{user.user.email}} </h3>
+           <h3 style="color:blue; ">Contact: {{user.phone}}</h3>
+            </div>
+        {% endfor %}
+        {% endif%}
+        </div>
+   
+{% endblock %}
