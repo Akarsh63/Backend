@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from django.views.generic import ListView
 from .models import SponsorType, Sponsor
 from accounts.models import EsportsUserProfile, UserProfile
@@ -29,8 +30,20 @@ def get_all_sponsors(request):
     sponsors = Sponsor.objects.all()
     serializer = SponsorSerializer(sponsors, many=True, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
+=======
+
+from .models import Sponsor,SponsorType
+from rest_framework import viewsets, permissions
+from .serializers import SponsorSerializer,SponsorTypeSerializer
+
+>>>>>>> 4e91eb38d449294a38a8b441e01997f9bc5d6043
 
 class SponsorViewSet(viewsets.ModelViewSet):
     queryset = Sponsor.objects.all()
     serializer_class = SponsorSerializer
+    permission_classes = [permissions.AllowAny]
+
+class SponsorSet(viewsets.ModelViewSet):
+    queryset = SponsorType.objects.all()
+    serializer_class = SponsorTypeSerializer
     permission_classes = [permissions.AllowAny]

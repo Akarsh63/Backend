@@ -10,28 +10,33 @@
             </select>
             <input type="submit" value="Filter" class="btn btn-primary" style="margin: 4px;">
         </form>
-        <div class="row mb-12">
-            <div class="col-2 themed-grid-col"><b>Team Name</b></div>
-            <div class="col-2 themed-grid-col"><b>Sport</b></div>
-            <div class="col-2 themed-grid-col"><b>Captian</b></div>
-            <div class="col-2 themed-grid-col"><b>College</b></div>
-            <div class="col-1 themed-grid-col"><b>Captain no.</b></div>
-            <div class="col-1 themed-grid-col"><b>Team size</b></div>
-            <div class="col-2 themed-grid-col"><b>Date Created</b></div>
-        </div>
-        {% for team in teams%}
-        <div class="row mb-12">
-            <div class="col-2 themed-grid-col">{{team}}</div>
-            <div class="col-2 themed-grid-col">{{team.get_sport_display}}</div>
-            <div class="col-2 themed-grid-col">{{team.captian.user.first_name}}</div>
-            <div class="col-2 themed-grid-col">{{team.college}}</div>
-            <div class="col-1 themed-grid-col"> {{team.captian.phone}} </div>
-            <div class="col-1 themed-grid-col"> {% for key, value in members.items %} {% if team.teamId == key %} {{value}}
-                {% endif %}
-              {% endfor %}  </div>
-            <div class="col-2 themed-grid-col">{{team.captian.user.date_joined}}</div>
-        </div>
-        {% endfor %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th><b>Team Name</b></th>
+                    <th><b>Sport</b></th>
+                    <!-- <th><b>Category</b></th>
+                    <th><b>Event</b></th> -->
+                    <th><b>Captain</b></th>
+                    <th><b>College</b></th>
+                    <th><b>Captain no.</b></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for team in teams %}
+                <tr>
+                    <td>{{ team }}</td>
+                    <td>{{ team.get_sport_display }}</td>
+                    <!-- <td>{{team.category}}</td>
+                    <td>{{team.teams}}</td> -->
+                    <td>{{ team.captian.user.first_name }}</td>
+                    <td>{{ team.college }}</td>
+                    <td>{{ team.captian.phone }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
     <br>
     <a href="{% url 'adminportal:dashboard' %}">Go Back</a>
     </div>

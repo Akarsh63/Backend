@@ -8,3 +8,5 @@ django-widget_tweaks
 xlwt
 django-rest_framework
 python-decouple
+django-cors-headers
+djangorestframework-simplejwt

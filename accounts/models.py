@@ -1,5 +1,21 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MaxValueValidator
+from django.utils import timezone
+
+class PasswordResetRequest(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    email = models.EmailField(max_length=120)
+    otp = models.PositiveIntegerField(validators=[MaxValueValidator(9999)])
+    expiration_time = models.DateTimeField(blank=True,null=True)
+
+    def __str__(self):
+        return self.user.email
+
+    def save(self, *args, **kwargs):
+        now = timezone.now()
+        self.expiration_time = now + timezone.timedelta(minutes=5)
+        super().save(*args, **kwargs)
 
 class PasswordResetRequest(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -75,6 +91,7 @@ class UserProfile(models.Model):
     no_of_days = models.CharField(max_length=1, choices=DAYS_CHOICES,blank=True)
     id_issued = models.BooleanField(default=False)
     qr_code = models.ImageField(upload_to='qr_code', blank=True, null=True)
+<<<<<<< HEAD
     teamId = models.ForeignKey("registration.TeamRegistration", on_delete=models.SET_NULL, null=True, related_name="member")
 
     def __str__(self):
@@ -175,3 +192,20 @@ class EsportsUserProfile(models.Model):
 
     def __str__(self):
         return self.user.username
+=======
+    teamId = models.ManyToManyField("registration.TeamRegistration", null=True, related_name="member",blank=True)
+    isesports=models.BooleanField(default=False)
+    team_member1_cr_ingame_id = models.CharField(max_length=128, blank=True, null=True)
+    team_member1_bgmi_ingame_id = models.CharField(max_length=128, blank=True, null=True)
+    team_member2_bgmi_ingame_id = models.CharField(max_length=128, blank=True, null=True)
+    team_member3_bgmi_ingame_id = models.CharField(max_length=128, blank=True, null=True)
+    team_member4_bgmi_ingame_id = models.CharField(max_length=128, blank=True, null=True)
+    team_member1_val_ingame_id = models.CharField(max_length=128, blank=True, null=True)
+    team_member2_val_ingame_id = models.CharField(max_length=128, blank=True, null=True)
+    team_member3_val_ingame_id = models.CharField(max_length=128, blank=True, null=True)
+    team_member4_val_ingame_id = models.CharField(max_length=128, blank=True, null=True)
+    team_member5_val_ingame_id = models.CharField(max_length=128, blank=True, null=True)
+    def __str__(self):
+        return self.user.username
+
+>>>>>>> 4e91eb38d449294a38a8b441e01997f9bc5d6043

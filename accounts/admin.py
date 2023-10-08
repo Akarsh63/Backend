@@ -1,16 +1,14 @@
 from django.contrib import admin
-from .models import UserProfile, EsportsUserProfile
+from .models import UserProfile,PasswordResetRequest
 
 
 class UserProfileAdmin(admin.ModelAdmin):
     class Meta:
         model = UserProfile
 
-
-class EsportsUserProfileAdmin(admin.ModelAdmin):
+class OTPAdmin(admin.ModelAdmin):
     class Meta:
-        model = EsportsUserProfile
-
+        model=PasswordResetRequest
 
 admin.site.register(UserProfile, UserProfileAdmin)
-admin.site.register(EsportsUserProfile, EsportsUserProfileAdmin)
+admin.site.register(PasswordResetRequest,OTPAdmin)

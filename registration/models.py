@@ -1,5 +1,5 @@
 from django.db import models
-from accounts.models import UserProfile,EsportsUserProfile
+from accounts.models import UserProfile
 
 class TeamRegistration(models.Model):
     SPORT_CHOICES = (
@@ -25,27 +25,9 @@ class TeamRegistration(models.Model):
     captian = models.ForeignKey(UserProfile, on_delete=models.CASCADE, blank=True, null=True)
     score = models.IntegerField(default=-1)
     category = models.CharField(max_length=1024, blank=True, null=True)
-    teams = models.JSONField(blank=True, default=list,null=True)
+    teams = models.CharField(blank=True, null=True,max_length=100)
     teamsize=models.IntegerField(default=1,blank=True,null=True)
     teamcount=models.IntegerField(default=1,blank=True,null=True)
-    def __str__(self):
-        if (self.teamId == None):
-            return "None"
-        return self.teamId
-
-
-class EsportsTeamRegistration(models.Model):
-    ESPORT_CHOICES = (
-        ('1', 'Valorant'),
-        ('2', 'BGMI'),
-        ('3', 'Chess')
-    )
-    teamId = models.CharField(max_length=15, unique=True, blank=True, null=True)
-    sport = models.CharField(max_length=2, choices=ESPORT_CHOICES)
-    college = models.CharField(max_length=128)
-    captian = models.ForeignKey(EsportsUserProfile, on_delete=models.CASCADE, blank=True, null=True)
-    score = models.IntegerField(default=0)
-
     def __str__(self):
         if (self.teamId == None):
             return "None"

@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
-from .models import UserProfile
+from .models import UserProfile,PasswordResetRequest
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,6 +13,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model=UserProfile
         fields='__all__'
+
+class PasswordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PasswordResetRequest
+        fields = '__all__'  # You can specify the fields you want to include here
 
 
 

@@ -5,40 +5,19 @@
 <head>
   <link rel="stylesheet" href="{% static 'css/index.css' %}">
 </head>
-{% include 'navbar.html'%}
 
 <!-- The home page -->
 <main>
-  {%include 'hero.html'%}
 
   <!-- The about section of the home page -->
 
 	{% include 'about.html'%}
 
-
-  <!-- The cards for events -->
-  {% include 'event-cards.html'%}
-
-  <!-- The bottom section of the home page -->
   {% include 'about-us.html'%}
 </main>
 
-
-{% include 'footer.html'%}
-
-
-
- 
-
-
-    
-   
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.2/gsap.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.2/ScrollTrigger.min.js"></script>
-
-  
-  
 
 </body>
 

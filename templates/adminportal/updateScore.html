@@ -18,7 +18,7 @@
 
 }
 </style>
-  <select name="sport" id="" onChange="window.location.href=this.value" style="margin: 5px;">
+  <select name="sport" id="" onChange="window.location.href=this.value" style="margin: 10px;">
   {% for sport in sports%}
       <option value="{% url 'adminportal:uscore' forloop.counter0 %}">{{sport}}</option>
   {% endfor %}
@@ -26,14 +26,19 @@
   <br/>
     <form action="{% url 'adminportal:uscore' 0 %}" method="post">
         {% csrf_token %}
-        <select name="teamId" id="">
+        
+        <select name="teamId" id="" style="margin: 10px;">
         {% for team in teams %}
             <option value="{{team.teamId}}">{{team.teamId}} - {{team.college}}</option>
         {% endfor %}
         </select>
-        <label for="score"></label>
-        <input type="text" name="score" id="" placeholder="score">
-        <input type="submit" value="Update Score" class="btn btn-primary" style="margin: 4px;">
+        {% if teams %}
+          <label for="score"></label>
+          <input type="text" name="score" id="" placeholder="score">
+          <input type="submit" value="Update Score" class="btn btn-primary" style="margin: 4px;">
+        {% else %}
+          <p style="margin-top: 20px;font-size: 17px;margin-left:10px">No teams are registered to this sport yet.</p>
+        {% endif %}
     </form>
     <br>
     <a href="{% url 'adminportal:dashboard' %}">Go Back</a>
