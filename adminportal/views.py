@@ -172,6 +172,44 @@ def downloadExcel(request):
     wb.save(response)
     return response
 
+@login_required(login_url='login')
+def teaminfo(request):
+    if not request.user.is_superuser:
+        return render(request, "404")    
+    if request.method == 'POST':
+        teamId = request.POST.get('teamId')
+        try:
+          team = TeamRegistration.objects.get(teamId=teamId)
+          code = teamId[3:6] != "BGM" and teamId[3:6] != "VAL" and teamId[3:6] != "CLA"
+          sport = None
+          for choice in team.SPORT_CHOICES:
+             if choice[0] == team.sport:
+                sport = choice[1]
+                break
+        except:
+             return render(request,"adminportal/teaminfo.html",{"msg":"please enter a valid teamId!"})
+        users=UserProfile.objects.filter(teamId__teamId=teamId)
+        return render(request,"adminportal/teaminfo.html",{"team":team,"users":users,"code":code,"sport":sport})
+    return render(request,"adminportal/teaminfo.html")
+    
+# def updateScore(request, sport=0):
+#     if not request.user.is_superuser:
+#         return render(request, "404")
+#     if sport == 0 or sport == '0':
+#         teams = TeamRegistration.objects.all().order_by('-captian__user__date_joined')
+#     elif sport == '11':
+#         teams = TeamRegistration.objects.all().exclude(college__iexact='IITJ').exclude(
+#             college__iexact='IIT Jodhpur').order_by('-captian__user__date_joined')
+#     else:
+#         teams = TeamRegistration.objects.filter(sport=sport).order_by('-captian__user__date_joined')
+#     sports = ['All', 'Athletics', 'Badminton', 'Basketball', 'Chess', 'Cricket', 'Football',
+#               'Table Tenis', 'Tenis', 'Volleyball', 'Badminton-mixed doubles', 'Exclude IITJ']
+#     if request.method == 'POST':
+#         teamId = request.POST.get('teamId')
+#         team = TeamRegistration.objects.get(teamId=teamId)
+#         team.score = request.POST.get('score')
+#         team.save()
+#     return render(request, 'adminportal/updateScore.html', {'teams': teams, 'sports': sports})
 
 # @login_required(login_url='login')
 # def downloadEsportsExcel(request):
